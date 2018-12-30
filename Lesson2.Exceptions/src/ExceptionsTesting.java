@@ -16,15 +16,21 @@ public class ExceptionsTesting {
 
         String[][] wrongEverythingArray = {{"f","2","3"},{"5","g","7","8","9"},{"f","2","3","4"}};
         get4x4ArrayElementsSumTesting(wrongEverythingArray);
+
+        String[][] nullPointerArray = null;
+        get4x4ArrayElementsSumTesting(nullPointerArray);
     }
 
     private static void get4x4ArrayElementsSumTesting(String[][] array) {
-        printArray(array);
         try{
+            printArray(array);
             int sum = get4x4ArrayElementsSum(array);
             System.out.printf("Сумма элементов массива: %d\n", sum);
         }catch(MyArraySizeException | MyArrayDataException e){
             System.out.println(e.getMessage() + " Сумма не посчиталась!");
+        }catch(NullPointerException e){
+            System.out.println("Вместо массива пустая ссылка! Вывод трека:");
+            e.printStackTrace();
         }
         System.out.println("-------------------------------------------------------------------------------------------------\n");
     }
