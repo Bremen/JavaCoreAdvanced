@@ -15,7 +15,7 @@ public class RepeatCounter {
         }
     }
 
-    private static Map<String, Integer> findRepeats(String[] wordArray) {
+    private static Map<String, Integer> findRepeats(final String[] wordArray) {
         Map<String, Integer> unicValueRepeats = new HashMap<>();
 
         for (String word : wordArray) {
