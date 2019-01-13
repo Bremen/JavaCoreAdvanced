@@ -19,11 +19,7 @@ public class RepeatCounter {
         Map<String, Integer> unicValueRepeats = new HashMap<>();
 
         for (String word : wordArray) {
-            if (unicValueRepeats.containsKey(word)){
-                unicValueRepeats.computeIfPresent(word, (k, v) -> v + 1);
-            }else{
-                unicValueRepeats.put(word, 1);
-            }
+            unicValueRepeats.put(word, unicValueRepeats.getOrDefault(word, 0)+1);
         }
 
         return unicValueRepeats;

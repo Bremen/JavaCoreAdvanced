@@ -1,19 +1,21 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class SimpleTelephoneDirectory {
-    private Map<String, ArrayList<String>> directory = new HashMap<>();
+    private Map<String, HashSet<String>> directory = new HashMap<>();
 
     public void add(String name, String phoneNumber){
         if (!directory.containsKey(name)){
-            directory.put(name, new ArrayList<>());
+            directory.put(name, new HashSet<>());
         }
 
         directory.get(name).add(phoneNumber);
     }
 
-    public ArrayList<String> get(String name){
+    //TODO добавить обработку исключения на случай если нет такого имени в справочнике
+    public HashSet<String> get(String name){
         return directory.get(name);
     }
 
@@ -29,6 +31,7 @@ class SimpleTelephoneDirectoryTest{
     public static void main(String[] args) {
         SimpleTelephoneDirectory directory = new SimpleTelephoneDirectory();
 
+        directory.add("Brown", "888-999");
         directory.add("Brown", "888-999");
         directory.add("Black", "555-444");
         directory.add("Brown", "777-666");
