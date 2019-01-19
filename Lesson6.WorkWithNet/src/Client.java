@@ -31,17 +31,30 @@ public class Client {
                     }
                 });
 
+                Thread sendingClientMessageThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true){
+                            String word = consoleScanner.nextLine(); // ждём пока клиент что-нибудь
+                            // не напишет в консоль
+                            pw.write(word + "\n"); // отправляем сообщение на сервер
+                            pw.flush();
+                            if(word.equals("end")){
+                                break;
+                            }
+                        }
+                    }
+                });
+
                 takingServerMessageThread.setDaemon(true);
                 takingServerMessageThread.start();
 
-                while (true){
-                    String word = consoleScanner.nextLine(); // ждём пока клиент что-нибудь
-                    // не напишет в консоль
-                    pw.write(word + "\n"); // отправляем сообщение на сервер
-                    pw.flush();
-                    if(word.equals("end")){
-                        break;
-                    }
+                sendingClientMessageThread.start();
+
+                try {
+                    sendingClientMessageThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             } finally { // в любом случае необходимо закрыть сокет и потоки
                 System.out.println("Клиент был закрыт...");

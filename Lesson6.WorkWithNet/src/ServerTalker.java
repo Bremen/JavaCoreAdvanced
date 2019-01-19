@@ -17,12 +17,41 @@ public class ServerTalker {
             System.out.println("Клиент подключился");
             Scanner sc = new Scanner(sock.getInputStream());
             PrintWriter pw = new PrintWriter(sock.getOutputStream(), true);
-            while (true) {
-                String clientWord = sc.nextLine();
-                System.out.println(clientWord); // получив - выводим на экран
-                if (clientWord.equals("end")) break;
 
-                pw.println(consoleScanner.nextLine());
+            Thread takingClientMessageThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true){
+                        String clientWord = sc.nextLine(); // ждём, что скажет сервер
+                        if (clientWord.equals("end")){
+                            break;
+                        }
+                        System.out.println(clientWord); // получив - выводим на экран
+                    }
+                }
+            });
+
+            Thread sendingServerMessageThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true){
+                        String word = consoleScanner.nextLine(); // ждём пока сервер что-нибудь
+                        // не напишет в консоль
+                        pw.write(word + "\n"); // отправляем сообщение на сервер
+                        pw.flush();
+                    }
+                }
+            });
+
+            takingClientMessageThread.start();
+
+            sendingServerMessageThread.setDaemon(true);
+            sendingServerMessageThread.start();
+
+            try {
+                takingClientMessageThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         } catch (IOException e) {
             System.out.println("Ошибка инициализации сервера");
