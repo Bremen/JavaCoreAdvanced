@@ -1,10 +1,21 @@
+/**
+ * 1. Написать консольный вариант клиент\серверного приложения, в котором пользователь может писать сообщения,
+ * как на клиентской стороне, так и на серверной. Т.е. если на клиентской стороне написать «Привет», нажать Enter,
+ * то сообщение должно передаться на сервер и там отпечататься в консоли. Если сделать то же самое на серверной стороне,
+ * то сообщение передается клиенту и печатается у него в консоли. Есть одна особенность, которую нужно учитывать:
+ * клиент или сервер может написать несколько сообщений подряд. Такую ситуацию необходимо корректно обработать.
+ */
+
+package mainTask;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Client {
     private static Socket clientSocket; //сокет для общения
-    private static Scanner consoleScanner = new Scanner(System.in); // нам нужен ридер читающий с консоли
+    private static Scanner consoleScanner = new Scanner(System.in); //ридер читающий с консоли
 
     public static void main(String[] args) {
         try {
@@ -16,17 +27,25 @@ public class Client {
                 Scanner sc = new Scanner(clientSocket.getInputStream());
                 PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                System.out.println("Вы что-то хотели сказать? Введите это здесь:");
+                System.out.println("Начинайте общение с сервером:");
                 // если соединение произошло и потоки успешно созданы - мы можем
-                //  работать дальше и предложить клиенту что то ввести
+                // работать дальше и предложить клиенту что то ввести
                 // если нет - вылетит исключение
 
                 Thread takingServerMessageThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while (true){
-                            String serverWord = sc.nextLine(); // ждём, что скажет сервер
-                            System.out.println(serverWord); // получив - выводим на экран
+                            String serverWord = "инициилизирующее сообщение, от сервера сообщений не было..";
+                            try {
+                                serverWord = sc.nextLine(); // ждём, что скажет сервер
+                            }catch (NoSuchElementException e)
+                            {
+                                serverWord = "выходим из цикла приема сообщений от сервера.";
+                                break;
+                            }finally {
+                                System.out.println(serverWord); // получив - выводим на экран
+                            }
                         }
                     }
                 });
@@ -63,7 +82,6 @@ public class Client {
         } catch (IOException e) {
             System.err.println(e);
         }
-
     }
 }
 
