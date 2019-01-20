@@ -6,9 +6,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler {
-
+    private ClientHandler ownThis = this; //Пришлось ввести этот объект, т.к. не понятно как вызывать this в потоке анонимного класса
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
@@ -33,7 +34,10 @@ public class ClientHandler {
                             }
                             server.broadcastMsg(str);
                         }
-                    } catch (IOException e) {
+                    }catch (SocketException e){
+                        System.out.println("Клиент отключился");
+                        server.removeClientFromServerList(ownThis); //Вот здесь не смог разобраться как вызвать this объекта ClientHandler
+                    }catch (IOException e) {
                         e.printStackTrace();
                     } finally {
                         try {
