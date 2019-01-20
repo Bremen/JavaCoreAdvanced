@@ -42,10 +42,15 @@ public class ServerTest {
 
     public void broadcastMsg(String msg) {
         for (ClientHandler client: clients) {
-            if(!client.isConnected()){
-                System.out.println("Обнаружен отключенный клиент");
-            }
             client.sendMsg(msg);
+        }
+    }
+
+    public void removeClientFromServerList(ClientHandler client){
+        if (clients.contains(client)){
+            if(clients.remove(client)){
+                System.out.println("Отключенный клиент успешно удален из списка сервера!");
+            }
         }
     }
 }

@@ -6,9 +6,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler {
-
     private Socket socket;
     private DataOutputStream out;
     private DataInputStream in;
@@ -33,7 +33,10 @@ public class ClientHandler {
                             }
                             server.broadcastMsg(str);
                         }
-                    } catch (IOException e) {
+                    }catch (SocketException e){
+                        System.out.println("Клиент отключился");
+                        server.removeClientFromServerList(ClientHandler.this);
+                    }catch (IOException e) {
                         e.printStackTrace();
                     } finally {
                         try {
