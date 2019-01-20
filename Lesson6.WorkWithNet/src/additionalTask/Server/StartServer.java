@@ -1,4 +1,4 @@
-package Lesson_6.Server;
+package additionalTask.Server;
 
 public class StartServer {
     public static void main(String[] args) {

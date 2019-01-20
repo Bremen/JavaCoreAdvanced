@@ -1,6 +1,6 @@
-package Lesson_6.Client;
+package additionalTask.Client;
 
-import Lesson_6.Server.ServerTest;
+import additionalTask.Server.ServerTest;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,7 +31,6 @@ public class ClientHandler {
                                 out.writeUTF("/serverClosed");
                                 break;
                             }
-                           // System.out.println("Client: " + str);
                             server.broadcastMsg(str);
                         }
                     } catch (IOException e) {
@@ -67,5 +66,9 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isConnected(){
+        return socket.isConnected();
     }
 }

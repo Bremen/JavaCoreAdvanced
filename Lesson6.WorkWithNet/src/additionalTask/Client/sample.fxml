@@ -8,7 +8,7 @@
 
 
 <VBox alignment="center" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.121"
-      fx:controller="Lesson_6.Client.Controller">
+      fx:controller="additionalTask.Client.Controller">
 
 
     <TextArea fx:id="textArea" editable="false" VBox.vgrow="ALWAYS" />

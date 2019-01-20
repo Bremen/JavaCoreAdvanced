@@ -1,14 +1,10 @@
-package Lesson_6.Server;
+package additionalTask.Server;
 
-import Lesson_6.Client.ClientHandler;
+import additionalTask.Client.ClientHandler;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.Vector;
 
 public class ServerTest {
@@ -45,8 +41,11 @@ public class ServerTest {
     }
 
     public void broadcastMsg(String msg) {
-        for (ClientHandler o: clients) {
-            o.sendMsg(msg);
+        for (ClientHandler client: clients) {
+            if(!client.isConnected()){
+                System.out.println("Обнаружен отключенный клиент");
+            }
+            client.sendMsg(msg);
         }
     }
 }

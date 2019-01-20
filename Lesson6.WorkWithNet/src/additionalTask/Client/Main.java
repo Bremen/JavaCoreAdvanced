@@ -1,4 +1,4 @@
-package Lesson_6.Client;
+package additionalTask.Client;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

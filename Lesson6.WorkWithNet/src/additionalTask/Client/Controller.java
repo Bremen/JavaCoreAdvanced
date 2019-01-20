@@ -1,4 +1,4 @@
-package Lesson_6.Client;
+package additionalTask.Client;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -65,7 +65,6 @@ public class Controller implements Initializable {
     }
 
     public void sendMsg() {
-       // textArea.appendText(textField.getText() + "\n");
         try {
             out.writeUTF(textField.getText());
             textField.clear();
