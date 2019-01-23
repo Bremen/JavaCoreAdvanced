@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.Vector;
 
 public class ServerTest {
+
     private Vector<ClientHandler> clients;
 
     public ServerTest(){
@@ -42,8 +43,15 @@ public class ServerTest {
         }
     }
 
-    public void subscribe(ClientHandler client) {
-        clients.add(client);
+    public boolean subscribe(ClientHandler client) {
+        boolean newClientSubscribed = false;
+        ClientHandler listedClient = getClientByNickName(client.getNick()); //Пытаемся найти клиента с таким же ником
+        if (listedClient == null){ //если такого нет, то подписываем нового клиента
+            clients.add(client);
+            newClientSubscribed = true;
+        }
+
+        return newClientSubscribed;
     }
 
     public void unsubscribe(ClientHandler client) {
@@ -51,8 +59,38 @@ public class ServerTest {
     }
 
     public void broadcastMsg(String msg) {
-        for (ClientHandler o: clients) {
-            o.sendMsg(msg);
+        String[] msgHead = msg.split(" ", 4);
+        if (msgHead[1].contains("personally")){
+            String sender = msgHead[0];
+            String recipient = msgHead[2];
+
+            ClientHandler recipientClient = getClientByNickName(recipient);
+            ClientHandler senderClient = getClientByNickName(sender);
+
+            if (recipientClient != null){
+                recipientClient.sendMsg(msg);
+            }else{
+                msg += String.format("\nПользователя с ником %s нет в чате.", recipient);
+            }
+            if (senderClient != null){
+                senderClient.sendMsg(msg);
+            }
+        }else{
+            for (ClientHandler o: clients) {
+                o.sendMsg(msg);
+            }
         }
+    }
+
+    private ClientHandler getClientByNickName(String nickName) {
+        ClientHandler client = null;
+        for (ClientHandler c: clients) {
+            if(c.getNick().contains(nickName)){
+                client = c;
+                break;
+            }
+        }
+
+        return client;
     }
 }
