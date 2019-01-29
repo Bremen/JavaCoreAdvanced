@@ -1,0 +1,161 @@
+package Lesson_6.Server;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+public class ClientHandler {
+    Date lastActivityTime = null;
+    final int timeOut = 120;
+    Socket socket = null;
+    DataInputStream in;
+    DataOutputStream out;
+    Server server;
+    ArrayList<String> blackList;
+
+    public String getNick() {
+        return nick;
+    }
+
+    String nick;
+
+    public ClientHandler(Server server, Socket socket) {
+        try {
+            this.server = server;
+            this.socket = socket;
+            this.in = new DataInputStream(socket.getInputStream());
+            this.out = new DataOutputStream(socket.getOutputStream());
+
+            Thread timeOutWatcher = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while(true){
+                        if (lastActivityTime != null){
+                            if (getIdleSeconds() > timeOut){
+                                server.unsubscribe(ClientHandler.this);
+                                try {
+                                    out.writeUTF("/serverClosed");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+                            }
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            String str = in.readUTF();
+                            if(str.startsWith("/auth")) {
+                                String[] tokens = str.split(" ");
+                                String newNick = AuthService.getNickByLoginAndPass(tokens[1], tokens[2]);
+                                if(newNick != null) {
+                                    if(!server.isNickBusy(newNick)) {
+                                        sendMsg("/authok");
+                                        nick = newNick;
+                                        blackList = AuthService.getBlackListFromDbForNick(nick);
+                                        server.subscribe(ClientHandler.this);
+                                        lastActivityTime = Calendar.getInstance().getTime();
+                                        break;
+                                    } else {
+                                        sendMsg("Учетная запись уже используется!");
+                                    }
+                                } else {
+                                    sendMsg("Неверный логин/пароль!");
+                                }
+                            }
+                        }
+
+                        timeOutWatcher.setDaemon(true);
+                        timeOutWatcher.start();
+
+                        while (true) {
+                            String str = in.readUTF();
+                            ClientHandler.this.lastActivityTime = Calendar.getInstance().getTime();
+                            if(str.startsWith("/")) {
+                                if(str.equals("/end")) {
+                                    out.writeUTF("/serverClosed");
+                                }
+                                if(str.startsWith("/w ")) {
+                                    String[] tokens = str.split(" ",3);
+                                    server.sendPersonalMsg(ClientHandler.this, tokens[1], tokens[2]);
+                                }
+                                if(str.startsWith("/blacklist ")) {
+                                    String[] tokens = str.split(" ");
+                                    if(blackList.contains(tokens[1])){
+                                        sendMsg("Пользователь " + tokens[1] + " уже находится черном списке");
+                                    }
+                                    else{
+                                        blackList.add(tokens[1]);
+                                        AuthService.addNickToBlackList(nick, tokens[1]);
+                                        sendMsg("Вы добавили пользователя " + tokens[1] + " в черный список");
+                                    }
+                                }
+                            } else {
+                                server.broadcastMsg(ClientHandler.this,nick + ": " + str);
+                            }
+                        }
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        server.unsubscribe(ClientHandler.this);
+                    }
+                }
+            }).start();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean checkBlackList(String nick) {
+        return blackList.contains(nick);
+    }
+
+    public void sendMsg(String msg) {
+        try {
+            out.writeUTF(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    int getIdleSeconds(){
+        Calendar cal = Calendar.getInstance();
+        Date curDate = cal.getTime();
+
+        int difference = (int)(curDate.getTime() - lastActivityTime.getTime())/1000;
+        System.out.println(difference);
+        return difference;
+    }
+}
